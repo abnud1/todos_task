@@ -55,15 +55,24 @@ todosRouter.delete("/:todoId", async (req, res) => {
   res.status(204);
   res.end();
 });
-todosRouter.get("/:todoId", async (req, res) => {
+todosRouter.get("/:todoId?", async (req, res) => {
   const todosCollection = await getTodosCollection();
-  const todo = await todosCollection.findOne({
-    _id: new ObjectId(req.params.todoId),
-    username: req.username,
-  });
-  if (!todo) {
-    res.status(404);
-    res.end();
-  } else res.json(todo);
+  if (req.params.todoId) {
+    const todo = await todosCollection.findOne({
+      _id: new ObjectId(req.params.todoId),
+      username: req.username,
+    });
+    if (!todo) {
+      res.status(404);
+      res.end();
+    } else res.json(todo);
+  } else {
+    const todos = await todosCollection
+      .find({
+        username: req.username,
+      })
+      .toArray();
+    res.json(todos);
+  }
 });
 export default todosRouter;
